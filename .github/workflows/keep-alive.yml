@@ -1,13 +1,28 @@
 name: Keep Render awake
 
+# Public repo => unlimited free Actions minutes, so instead of relying on
+# GitHub's schedule trigger to fire exactly every few minutes (it doesn't -
+# it's "best effort" and can lag well past Render's 15-minute sleep window,
+# especially right after a workflow is created/changed), each run pings the
+# service in an internal loop for most of the 6-hour job time limit. The
+# schedule below just restarts that loop periodically; overlapping runs are
+# harmless (they just ping the same URL) and add redundancy in case any one
+# trigger is delayed.
+
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch: {}
 
 jobs:
-  ping:
+  ping-loop:
     runs-on: ubuntu-latest
+    timeout-minutes: 355
     steps:
-      - name: Ping Render service
-        run: curl -fsS --max-time 20 "https://chipta-bot.onrender.com" || true
+      - name: Ping Render every 4 minutes for ~5h50m
+        run: |
+          END=$((SECONDS + 350*60))
+          while [ $SECONDS -lt $END ]; do
+            curl -fsS --max-time 20 "https://chipta-bot.onrender.com" || true
+            sleep 240
+          done
