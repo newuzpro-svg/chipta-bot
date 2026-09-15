@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: chipta-bot
+    env: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: CHECK_INTERVAL_MINUTES
+        value: "12"
+      - key: PROXY_ENABLED
+        value: "true"
+      - key: DB_PATH
+        value: "data/subscriptions.db"
