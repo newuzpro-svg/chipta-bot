@@ -178,4 +178,11 @@ def build_conversation_handler() -> ConversationHandler:
             CONFIRM: [CallbackQueryHandler(confirm, pattern=r"^confirm:")],
         },
         fallbacks=[CommandHandler("cancel", cancel_conversation)],
+        # Without this, once a user is mid-flow (e.g. taps an inline button that
+        # no longer applies, or taps "Yangi kuzatuv" again instead of finishing),
+        # PTB stops rechecking entry_points and the button silently does nothing
+        # until the process restarts. allow_reentry lets /add or the menu button
+        # always restart the flow instead of getting stuck in a dead state.
+        allow_reentry=True,
+        conversation_timeout=600,
     )
